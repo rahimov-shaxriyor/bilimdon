@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@plugin "daisyui";
+@import '@fontsource/mouse-memoirs';
+
+@theme{
+    --color-blue: #2463FF;
+    --color-blue-83opacity: #001479D4;
+    --color-blue-25opacity: rgba(36, 99, 255, 0.25);
+    --color-white: #fff;
+    --color-white-25opacity: rgba(255, 255, 255, 0.25);
+    --color-dark-navy: #261676;
+    --color-gray: #887DC0;
+    --default-font-family: 'Mouse Memoirs', sans-serif;
+}
+
+@layer components{
+    .keyboard{
+        @apply px-8.75 py-2.5 text-dark-navy text-[2.1875rem] rounded-[1.5625rem] cursor-pointer
+    }
+    .word{
+        @apply w-17.5 min-h-25 text-white text-[3.125rem] rounded-[1.5625rem] flex justify-center items-center
+    }
+}
+
+@layer utilities{
+    .container{
+        @apply max-w-[1400px] mx-auto px-2.5 
+    }
+}
