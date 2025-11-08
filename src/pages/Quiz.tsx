@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useGetData from "../hooks/useGetData";
 import { useParams } from "react-router-dom";
+import QuestionDisplay from "../components/QuestionDisplay";
+import Keyboard from "../components/Keyboard";
+import { toast, ToastContainer } from "react-toastify";
+import Modal from "../components/Modal";
 
 type Quiz = {
   id: number
@@ -16,26 +20,28 @@ const Quiz = () => {
 
   const {id} = useParams()
   const {data, loading} = useGetData<Quiz>("questions/"+id)
-  console.log(data);
   
-
-  const letters = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
   const [guessedLetters, setGuessedLetters] = useState<string[]>([])
-  const [avtiveAnswer, setActiveAnswer] = useState(0)
+  const [avtiveAnswer, setActiveAnswer] = useState<number>(0)
   const question = data?.questions[avtiveAnswer].question
   const answer = data?.questions[avtiveAnswer].answer.toUpperCase()
-  
 
-  const handleClick = (letter:string)=>{
-    if (guessedLetters.includes(letter)) return; 
-    setGuessedLetters([...guessedLetters, letter])
-  }
+  const [isOpen, setOpen] = useState<boolean>(false)
 
-  const isTrue = answer?.split("").every(l=>guessedLetters.includes(l) || l==" ")
-  if(isTrue){
-    setActiveAnswer(prev=>prev+1)
-    setGuessedLetters([])
-  }
+  useEffect(()=>{
+    const isTrue = answer?.split("").every(l=>guessedLetters.includes(l) || l==" ")
+    if(isTrue){
+      if(data && data.questions.length-1 > avtiveAnswer){
+        setTimeout(() => {
+          setActiveAnswer(prev=>prev+1)
+          setGuessedLetters([])
+        }, 3000);
+        toast.success("Tog'ri topdingiz!")
+      }else{
+        setOpen(true)
+      }
+    }
+  }, [guessedLetters])
   
   if(loading){
     return (
@@ -45,36 +51,12 @@ const Quiz = () => {
     )
   }
   
-  
   return (
-    <div className="min-h-screen container flex flex-col items-center justify-center gap-12.5">
-        <p className="text-[1.875rem]">{question}</p>
-        <div className="flex gap-10">
-            {answer?.split(" ").map((el, i)=>(
-              <div className="w-full" key={i}>
-                  <ul className="flex gap-2.5">
-                      {el.toUpperCase().split("").map((l, i)=>(
-                          <li className={`word ${guessedLetters.includes(l) ? "bg-blue" : "bg-blue-25opacity"}`} key={i}>{guessedLetters.includes(l) ? l : ""}</li>
-                      ))}
-                  </ul>
-              </div>
-            ))}
-        </div>
-
-        <div className="flex flex-col items-center gap-5">
-            {letters.map((el, i)=>(
-                <div key={i}>
-                    <ul className="flex gap-5">
-                        {el.split("").map((l, i)=>(
-                          <li key={i}>
-                              <button onClick={()=>handleClick(l)} className={`keyboard ${answer?.toUpperCase().includes(l) && guessedLetters.includes(l) ? "bg-white-25opacity" : "bg-white"}`}>{l}</button>
-                          </li>
-                        ))}
-                    </ul>
-                </div>
-            ))}
-        </div>
-
+    <div className="min-h-screen container flex flex-col justify-center gap-12.5">
+        <ToastContainer autoClose={2500}/>
+        <QuestionDisplay question={question} answer={answer} guessedLetters={guessedLetters}/>
+        <Keyboard answer={answer} guessedLetters={guessedLetters} setGuessedLetters={setGuessedLetters}/>
+        <Modal isOpen={isOpen}/>
     </div>
   )
 }
